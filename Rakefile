@@ -1,25 +1,33 @@
 require 'puppetlabs_spec_helper/rake_tasks'
-require 'puppet-lint/tasks/puppet-lint'
+require 'puppet_blacksmith/rake_tasks'
+require 'voxpupuli/release/rake_tasks'
+require 'puppet-strings/tasks'
 
-Rake::Task['lint'].clear
+PuppetLint.configuration.log_format = '%{path}:%{line}:%{check}:%{KIND}:%{message}'
+PuppetLint.configuration.fail_on_warnings = true
+PuppetLint.configuration.send('relative')
+PuppetLint.configuration.send('disable_140chars')
+PuppetLint.configuration.send('disable_class_inherits_from_params_class')
+PuppetLint.configuration.send('disable_documentation')
+PuppetLint.configuration.send('disable_single_quote_string_with_variables')
 
-PuppetLint::RakeTask.new :lint do |config|
-  config.pattern = 'manifests/**/*.pp'
-  config.fail_on_warnings = true
+exclude_paths = %w(
+  pkg/**/*
+  vendor/**/*
+  .vendor/**/*
+  spec/**/*
+)
+PuppetLint.configuration.ignore_paths = exclude_paths
+PuppetSyntax.exclude_paths = exclude_paths
+
+desc 'Run acceptance tests'
+RSpec::Core::RakeTask.new(:acceptance) do |t|
+  t.pattern = 'spec/acceptance'
 end
 
-task :default => [:validate, :lint, :spec]
-
-namespace :spec do
-  task :acceptance do
-    ['centos65', 'debian7', 'sles11sp3', 'ubuntu1404'].each do |set|
-      name = 'spec:acceptance:' + set
-      ENV['BEAKER_set'] = set
-      ENV['BEAKER_destroy'] = 'onpass'
-      Spec::Rake::SpecTask.new(name) do |t|
-        t.pattern = 'spec/acceptance/**/*_spec.rb'
-      end
-      Rake::Task[name].invoke
-    end
-  end
-end
+desc 'Run tests metadata_lint, release_checks'
+task test: [
+  :metadata_lint,
+  :release_checks,
+]
+# vim: syntax=ruby

@@ -32,6 +32,7 @@ class php::params inherits php::globals {
       $fpm_service_name        = $php::globals::fpm_service_name
       $fpm_user                = 'www-data'
       $fpm_group               = 'www-data'
+      $apache_inifile          = "${config_root}/apache2/php.ini"
       $embedded_package_suffix = 'embed'
       $embedded_inifile        = "${config_root}/embed/php.ini"
       $package_prefix          = $php::globals::package_prefix
@@ -47,7 +48,7 @@ class php::params inherits php::globals {
         }
 
         'Ubuntu': {
-          $manage_repos = true
+          $manage_repos = false
         }
 
         default: {
@@ -57,16 +58,22 @@ class php::params inherits php::globals {
     }
 
     'Suse': {
+      if ($php::globals::php_version != undef) {
+        $php_version_major = regsubst($php::globals::php_version, '^(\d+)\.(\d+)$','\1')
+      } else {
+        $php_version_major = 5
+      }
+
       $config_root             = $php::globals::globals_config_root
       $config_root_ini         = "${config_root}/conf.d"
       $config_root_inifile     = "${config_root}/php.ini"
-      $common_package_names    = ['php5']
+      $common_package_names    = ["php${php_version_major}"]
       $common_package_suffixes = []
       $cli_inifile             = "${config_root}/cli/php.ini"
       $dev_package_suffix      = 'devel'
       $fpm_pid_file            = $php::globals::globals_fpm_pid_file
       $fpm_config_file         = "${config_root}/fpm/php-fpm.conf"
-      $fpm_error_log           = '/var/log/php5-fpm.log'
+      $fpm_error_log           = $php::globals::fpm_error_log
       $fpm_inifile             = "${config_root}/fpm/php.ini"
       $fpm_package_suffix      = 'fpm'
       $fpm_pool_dir            = "${config_root}/fpm/pool.d"
@@ -75,9 +82,11 @@ class php::params inherits php::globals {
       $fpm_group               = 'www'
       $embedded_package_suffix = 'embed'
       $embedded_inifile        = "${config_root}/embed/php.ini"
-      $package_prefix          = 'php5-'
+      $package_prefix          = $php::globals::package_prefix
       $manage_repos            = true
       $root_group              = 'root'
+      $ext_tool_enable         = undef
+      $ext_tool_query          = undef
       $ext_tool_enabled        = false
       case $::operatingsystem {
         'SLES': {
@@ -107,12 +116,15 @@ class php::params inherits php::globals {
       $fpm_service_name        = 'php-fpm'
       $fpm_user                = 'apache'
       $fpm_group               = 'apache'
+      $apache_inifile          = '/etc/php.ini'
       $embedded_package_suffix = 'embedded'
       $embedded_inifile        = '/etc/php.ini'
       $package_prefix          = 'php-'
       $compiler_packages       = ['gcc', 'gcc-c++', 'make']
       $manage_repos            = false
       $root_group              = 'root'
+      $ext_tool_enable         = undef
+      $ext_tool_query          = undef
       $ext_tool_enabled        = false
     }
     'FreeBSD': {
@@ -141,6 +153,8 @@ class php::params inherits php::globals {
       $compiler_packages       = ['gcc']
       $manage_repos            = false
       $root_group              = 'wheel'
+      $ext_tool_enable         = undef
+      $ext_tool_query          = undef
       $ext_tool_enabled        = false
     }
     default: {

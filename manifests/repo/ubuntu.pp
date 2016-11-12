@@ -5,17 +5,13 @@
 # [*version*]
 #   PHP version to manage (e.g. 5.6)
 #
-# [*ppa*]
-#   Use a specific PPA, e.g "ondrej/php" (without the "ppa:")
-#
 class php::repo::ubuntu (
   $version   = undef,
-  $ppa       = undef,
 ) {
   include '::apt'
 
   if($version == undef) {
-    $version_real = '5.5'
+    $version_real = '5.6'
   } else {
     $version_real = $version
   }
@@ -29,13 +25,5 @@ class php::repo::ubuntu (
     '7.0' => 'ondrej/php'
   }
 
-  if ($version != undef and $ppa != undef) {
-    fail('Only one of $version and $ppa can be specified.')
-  }
-
-  if ($ppa) {
-    ::apt::ppa { "ppa:${ppa}": }
-  } else {
-    ::apt::ppa { "ppa:${version_repo}": }
-  }
+  ::apt::ppa { "ppa:${version_repo}": }
 }

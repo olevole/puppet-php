@@ -1,6 +1,6 @@
 {
   "name": "mayflower-php",
-  "version": "3.4.2",
+  "version": "4.0.0-beta1",
   "author": "mayflower",
   "summary": "Generic PHP module that supports many platforms",
   "license": "MIT",
@@ -22,9 +22,7 @@
   "operatingsystem_support": [
     { "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "14.10",
-        "14.04",
-        "12.04"
+        "14.04"
       ]
     },
     { "operatingsystem": "Debian",
